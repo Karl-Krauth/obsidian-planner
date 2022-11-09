@@ -3,7 +3,7 @@ export function strToDate(dateStr: string): Date {
     // Convert month to zero index.
     const month = parseInt(dateStr.slice(4, 6)) - 1;
     const day = parseInt(dateStr.slice(6, 8));
-    return new Date(year, month - 1, day);
+    return new Date(year, month, day);
 }
 
 export function tickTask(task: string): string {

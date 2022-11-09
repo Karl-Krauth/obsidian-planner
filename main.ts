@@ -1,5 +1,6 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
 import { DAY_FOLDER, updateDay } from 'day';
+import { strToDate } from 'utils';
 
 // Remember to rename these classes and interfaces!
 
@@ -49,7 +50,13 @@ export default class MyPlugin extends Plugin {
         const parentFolder = splitPath[0];
         new Notice(parentFolder);
         if (parentFolder === DAY_FOLDER) {
-            updateDay(this.app.vault, file);
+            if (!/Day Planner-\d\d\d\d\d\d\d\d/.test(file.name)) {
+                return;
+            }
+
+            const dateStr = file.name.split('-')[1];
+            const date = strToDate(dateStr);
+            updateDay(this.app.vault, date);
             new Notice('Day');
         } else if (parentFolder === 'Week Planners') {
             new Notice('Week');
