@@ -20,7 +20,7 @@ export default class MyPlugin extends Plugin {
         // This adds a settings tab so the user can configure various aspects of the plugin
         this.addSettingTab(new SampleSettingTab(this.app, this));
 
-        this.registerEvent(this.app.workspace.on('file-open', updateFile));
+        this.registerEvent(this.app.workspace.on('file-open', (file) => this.updateFile(file)));
     }
 
     onunload() {
@@ -33,6 +33,31 @@ export default class MyPlugin extends Plugin {
 
     async saveSettings() {
         await this.saveData(this.settings);
+    }
+
+    async updateFile(file: TFile | null) {
+        if (file === null) {
+            return;
+        }
+
+        new Notice(file.path);
+        const splitPath = file.path.split('/');
+        if (splitPath.length > 2) {
+            return;
+        }
+
+        const parentFolder = splitPath[0];
+        new Notice(parentFolder);
+        if (parentFolder === DAY_FOLDER) {
+            updateDay(this.app.vault, file);
+            new Notice('Day');
+        } else if (parentFolder === 'Week Planners') {
+            new Notice('Week');
+        } else if (parentFolder === 'Month Planners') {
+            new Notice('Month');
+        } else if (parentFolder === 'Projects') {
+            new Notice('Project');
+        }
     }
 }
 
@@ -65,27 +90,3 @@ class SampleSettingTab extends PluginSettingTab {
     }
 }
 
-function updateFile(file: TFile | null) {
-    if (file === null) {
-        return;
-    }
-
-    new Notice(file.path);
-    const splitPath = file.path.split('/');
-    if (splitPath.length > 2) {
-        return;
-    }
-
-    const parentFolder = splitPath[0];
-    new Notice(parentFolder);
-    if (parentFolder === DAY_FOLDER) {
-        updateDay(file);
-        new Notice('Day');
-    } else if (parentFolder === 'Week Planners') {
-        new Notice('Week');
-    } else if (parentFolder === 'Month Planners') {
-        new Notice('Month');
-    } else if (parentFolder === 'Projects') {
-        new Notice('Project');
-    }
-}
