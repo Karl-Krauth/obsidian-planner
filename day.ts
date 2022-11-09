@@ -1,3 +1,4 @@
+import { TFile } from 'obsidian';
 import { strToDate } from 'utils';
 import { Week } from 'week';
 
@@ -13,7 +14,7 @@ export function updateDay(file: TFile) {
     let day = new Day(file);
     const week = new Week(date);
 
-    day.updateTasks(getTasks(date));
+    day.updateTasks(week.getTasks(date));
     day.commit();
 }
 

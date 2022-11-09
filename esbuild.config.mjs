@@ -1,6 +1,7 @@
 import esbuild from "esbuild";
 import process from "process";
 import builtins from 'builtin-modules'
+import { exec } from 'child_process'
 
 const banner =
 `/*
@@ -33,10 +34,25 @@ esbuild.build({
         '@lezer/lr',
         ...builtins],
     format: 'cjs',
-    watch: !prod,
+    watch: prod ? false : {
+        onRebuild(err, result) {
+            if (err) {
+                console.error(err);
+            } else {
+                exec("npm run ts-types",
+                     (err, stdout, stderr) => {
+                         console.log(stdout);
+                         if (err) {
+                             console.error(stderr);
+                         }
+                     });
+                console.log(result);
+            }
+        }
+    },
     target: 'es2018',
     logLevel: "info",
     sourcemap: prod ? false : 'inline',
     treeShaking: true,
-    outfile: 'main.js',
+    outfile: '/mnt/c/Users/karlk/Documents/Obsidian\ Vault/.obsidian/plugins/obsidian-planner/main.js',
 }).catch(() => process.exit(1));

@@ -3,7 +3,7 @@ export class Week {
 
     }
 
-    public getTasks(): string[] {
+    public getTasks(date: Date): string[] {
         return [];
     }
 }
