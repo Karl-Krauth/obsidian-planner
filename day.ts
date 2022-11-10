@@ -3,6 +3,10 @@ import * as utils from 'utils';
 import * as week from 'week';
 
 export const DAY_FOLDER = 'Day Planners'
+const DAY_TEMPLATE = '## Day Planner\n' +
+                     '### Morning\n' +
+                     '### Afternoon\n' +
+                     '### Evening\n'
 
 export async function updateDaysFromWeek(vault: Vault, date: Date) {
     let currDate = new Date(date);
@@ -11,7 +15,7 @@ export async function updateDaysFromWeek(vault: Vault, date: Date) {
         const filePath = dateToFilePath(currDate);
         let file = vault.getAbstractFileByPath(filePath);
         if (!(file instanceof TFile)) {
-            file = await vault.create(filePath, '');
+            file = await vault.create(filePath, DAY_TEMPLATE);
         }
 
         const tasks = await week.getTasks(vault, currDate);

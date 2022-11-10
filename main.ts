@@ -45,7 +45,6 @@ export default class MyPlugin extends Plugin {
             return;
         }
 
-        new Notice(lastFiles[0]);
         const splitPath = lastFiles[0].split('/');
         if (splitPath.length > 2) {
             return;
@@ -53,7 +52,6 @@ export default class MyPlugin extends Plugin {
 
         const parentFolder = splitPath[0];
         const fileName = splitPath[1];
-        new Notice(parentFolder);
         if (parentFolder === day.DAY_FOLDER) {
             if (!/Day Planner-\d\d\d\d\d\d\d\d/.test(fileName)) {
                 return;
@@ -62,7 +60,6 @@ export default class MyPlugin extends Plugin {
             const dateStr = fileName.split('-')[1];
             const date = utils.strToDate(dateStr);
             await week.updateWeekFromDay(this.app.vault, date);
-            new Notice('Day');
         } else if (parentFolder === week.WEEK_FOLDER) {
             if (!/\d\d\d\d\d\d\d\d/.test(fileName)) {
                 return;
@@ -71,7 +68,6 @@ export default class MyPlugin extends Plugin {
             const date = utils.strToDate(fileName);
             await day.updateDaysFromWeek(this.app.vault, date);
             await month.updateMonthFromWeek(this.app.vault, date);
-            new Notice('Week');
         } else if (parentFolder === month.MONTH_FOLDER) {
             if (!/\d\d\d\d\d\d/.test(fileName)) {
                 return;
@@ -80,11 +76,9 @@ export default class MyPlugin extends Plugin {
             const date = utils.strToDate(fileName);
             await week.updateWeeksFromMonth(this.app.vault, date);
             await project.updateProjectsFromMonth(this.app.vault, date);
-            new Notice('Month');
         } else if (parentFolder === project.PROJECT_FOLDER) {
             const projectName = fileName.slice(0, -3);
             await month.updateMonthsFromProject(this.app.vault, projectName);
-            new Notice('Project');
         }
     }
 }

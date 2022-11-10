@@ -4,13 +4,20 @@ import { TFile, Vault } from 'obsidian';
 import { parseTask } from 'utils';
 
 export const WEEK_FOLDER = 'Week Planners';
+const WEEK_TEMPLATE = '# Monday\n' +
+                      '# Tuesday\n' +
+                      '# Wednesday\n' +
+                      '# Thursday\n' +
+                      '# Friday\n' +
+                      '# Saturday\n' +
+                      '# Sunday\n';
 
 export async function updateWeekFromDay(vault: Vault, date: Date) {
     const mondayDate = getMonday(date);
     const filePath = dateToFilePath(mondayDate);
     let file = vault.getAbstractFileByPath(filePath);
     if (!(file instanceof TFile)) {
-        file = await vault.create(filePath, '');
+        file = await vault.create(filePath, WEEK_TEMPLATE);
     }
 
     const tasks = await day.getTasks(vault, date);
