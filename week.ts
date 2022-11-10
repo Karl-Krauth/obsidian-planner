@@ -1,4 +1,5 @@
 import * as day from 'day';
+import * as utils from 'utils';
 import { TFile, Vault } from 'obsidian';
 import { parseTask } from 'utils';
 
@@ -61,7 +62,14 @@ export async function getTasks(vault: Vault, date: Date): Promise<Set<string>> {
 }
 
 async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
+    // Read in the file.
+    let lines = (await vault.read(file)).split('\n');
 
+    // Update task ticks.
+    lines = utils.updateTicks(lines, tasks);
+
+    // Write out the file.
+    await vault.modify(file, lines.join('\n'));
 }
 
 function dateToFilePath(date: Date): string {

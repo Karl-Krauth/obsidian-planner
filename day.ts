@@ -7,15 +7,16 @@ export const DAY_FOLDER = 'Day Planners'
 export async function updateDaysFromWeek(vault: Vault, date: Date) {
     let currDate = new Date(date);
     for (let i = 0; i < 7; i++) {
-        currDate.setDate(currDate.getDate() + i);
+        console.log(currDate);
         const filePath = dateToFilePath(currDate);
         let file = vault.getAbstractFileByPath(filePath);
         if (!(file instanceof TFile)) {
             file = await vault.create(filePath, '');
         }
 
-        const tasks = await week.getTasks(vault, date);
+        const tasks = await week.getTasks(vault, currDate);
         await updateTasks(vault, file as TFile, tasks);
+        currDate.setDate(currDate.getDate() + 1);
     }
 }
 
