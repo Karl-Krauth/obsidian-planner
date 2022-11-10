@@ -1,6 +1,6 @@
 import { TFile, Vault } from 'obsidian';
 import { parseTask, tickTask, untickTask } from 'utils';
-import { Week } from 'week';
+import { getTasks } from 'week';
 
 export const DAY_FOLDER = 'Day Planners'
 
@@ -10,8 +10,8 @@ export async function updateDay(vault: Vault, date: Date) {
         return;
     }
 
-    const week = new Week(date, vault);
-    await updateTasks(vault, file, week.getTasks(date));
+    const tasks = await getTasks(vault, date);
+    await updateTasks(vault, file, tasks);
 }
 
 async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
