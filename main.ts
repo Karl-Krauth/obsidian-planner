@@ -61,7 +61,7 @@ export default class MyPlugin extends Plugin {
 
             const dateStr = fileName.split('-')[1];
             const date = utils.strToDate(dateStr);
-            await day.updateWeekFromDay(this.app.vault, date);
+            await week.updateWeekFromDay(this.app.vault, date);
             new Notice('Day');
         } else if (parentFolder === week.WEEK_FOLDER) {
             if (!/\d\d\d\d\d\d\d\d/.test(fileName)) {
@@ -69,8 +69,8 @@ export default class MyPlugin extends Plugin {
             }
 
             const date = utils.strToDate(fileName);
-            await week.updateDaysFromWeek(this.app.vault, date);
-            await week.updateMonthFromWeek(this.app.vault, date);
+            await day.updateDaysFromWeek(this.app.vault, date);
+            await month.updateMonthFromWeek(this.app.vault, date);
             new Notice('Week');
         } else if (parentFolder === month.MONTH_FOLDER) {
             if (!/\d\d\d\d\d\d/.test(fileName)) {
@@ -78,12 +78,12 @@ export default class MyPlugin extends Plugin {
             }
 
             const date = utils.strToDate(fileName);
-            await month.updateWeeksFromMonth(this.app.vault, date);
-            await month.updateProjectsFromMonth(this.app.vault, date);
+            await week.updateWeeksFromMonth(this.app.vault, date);
+            await project.updateProjectsFromMonth(this.app.vault, date);
             new Notice('Month');
         } else if (parentFolder === project.PROJECT_FOLDER) {
             const projectName = fileName.slice(0, -3);
-            await project.updateMonthsFromProject(this.app.vault, projectName);
+            await month.updateMonthsFromProject(this.app.vault, projectName);
             new Notice('Project');
         }
     }

@@ -3,11 +3,11 @@ import { parseTask } from 'utils';
 
 export const WEEK_FOLDER = 'Week Planners';
 
-export async function updateDaysFromWeek(vault: Vault, date: Date) {
+export async function updateWeekFromDay(vault: Vault, date: Date) {
 
 }
 
-export async function updateMonthFromWeek(vault: Vault, date: Date) {
+export async function updateWeeksFromMonth(vault: Vault, date: Date) {
 
 }
 

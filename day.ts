@@ -4,11 +4,7 @@ import { getTasks } from 'week';
 
 export const DAY_FOLDER = 'Day Planners'
 
-export async function updateWeekFromDay(vault: Vault, date: Date) {
-
-}
-
-export async function updateDay(vault: Vault, date: Date) {
+export async function updateDaysFromWeek(vault: Vault, date: Date) {
     const file = vault.getAbstractFileByPath(dateToFilePath(date));
     if (!(file instanceof TFile)) {
         return;
