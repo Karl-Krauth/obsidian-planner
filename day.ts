@@ -4,6 +4,10 @@ import { getTasks } from 'week';
 
 export const DAY_FOLDER = 'Day Planners'
 
+export async function updateWeekFromDay(vault: Vault, date: Date) {
+
+}
+
 export async function updateDay(vault: Vault, date: Date) {
     const file = vault.getAbstractFileByPath(dateToFilePath(date));
     if (!(file instanceof TFile)) {
@@ -25,10 +29,10 @@ async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
         if (task) {
             if (tasks.has(tickTask(task))) {
                 lines[i] = tickTask(lines[i]);
-                newTasks.delete(task);
+                newTasks.delete(tickTask(task));
             } else if (tasks.has(untickTask(task))) {
                 lines[i] = untickTask(lines[i]);
-                newTasks.delete(task);
+                newTasks.delete(untickTask(task));
             }
         }
     }

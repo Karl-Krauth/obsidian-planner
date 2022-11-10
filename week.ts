@@ -3,6 +3,14 @@ import { parseTask } from 'utils';
 
 export const WEEK_FOLDER = 'Week Planners';
 
+export async function updateDaysFromWeek(vault: Vault, date: Date) {
+
+}
+
+export async function updateMonthFromWeek(vault: Vault, date: Date) {
+
+}
+
 export async function getTasks(vault: Vault, date: Date): Promise<Set<string>> {
     const mondayDate = getMonday(date);
     const file = vault.getAbstractFileByPath(dateToFilePath(mondayDate));

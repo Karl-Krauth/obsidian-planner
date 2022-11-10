@@ -1,6 +1,9 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
-import { DAY_FOLDER, updateDay } from 'day';
-import { strToDate } from 'utils';
+import * as day from 'day';
+import * as month from 'month';
+import * as utils from 'utils';
+import * as project from 'project';
+import * as week from 'week';
 
 // Remember to rename these classes and interfaces!
 
@@ -37,32 +40,50 @@ export default class MyPlugin extends Plugin {
     }
 
     async updateFile(file: TFile | null) {
-        if (file === null) {
+        const lastFiles = this.app.workspace.getLastOpenFiles();
+        if (!lastFiles) {
             return;
         }
 
-        new Notice(file.path);
-        const splitPath = file.path.split('/');
+        new Notice(lastFiles[0]);
+        const splitPath = lastFiles[0].split('/');
         if (splitPath.length > 2) {
             return;
         }
 
         const parentFolder = splitPath[0];
+        const fileName = splitPath[1];
         new Notice(parentFolder);
-        if (parentFolder === DAY_FOLDER) {
-            if (!/Day Planner-\d\d\d\d\d\d\d\d/.test(file.name)) {
+        if (parentFolder === day.DAY_FOLDER) {
+            if (!/Day Planner-\d\d\d\d\d\d\d\d/.test(fileName)) {
                 return;
             }
 
-            const dateStr = file.name.split('-')[1];
-            const date = strToDate(dateStr);
-            updateDay(this.app.vault, date);
+            const dateStr = fileName.split('-')[1];
+            const date = utils.strToDate(dateStr);
+            await day.updateWeekFromDay(this.app.vault, date);
             new Notice('Day');
-        } else if (parentFolder === 'Week Planners') {
+        } else if (parentFolder === week.WEEK_FOLDER) {
+            if (!/\d\d\d\d\d\d\d\d/.test(fileName)) {
+                return;
+            }
+
+            const date = utils.strToDate(fileName);
+            await week.updateDaysFromWeek(this.app.vault, date);
+            await week.updateMonthFromWeek(this.app.vault, date);
             new Notice('Week');
-        } else if (parentFolder === 'Month Planners') {
+        } else if (parentFolder === month.MONTH_FOLDER) {
+            if (!/\d\d\d\d\d\d/.test(fileName)) {
+                return;
+            }
+
+            const date = utils.strToDate(fileName);
+            await month.updateWeeksFromMonth(this.app.vault, date);
+            await month.updateProjectsFromMonth(this.app.vault, date);
             new Notice('Month');
-        } else if (parentFolder === 'Projects') {
+        } else if (parentFolder === project.PROJECT_FOLDER) {
+            const projectName = fileName.slice(0, -3);
+            await project.updateMonthsFromProject(this.app.vault, projectName);
             new Notice('Project');
         }
     }
