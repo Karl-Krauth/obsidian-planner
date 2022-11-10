@@ -4,9 +4,10 @@ import * as week from 'week';
 
 export const DAY_FOLDER = 'Day Planners'
 const DAY_TEMPLATE = '## Day Planner\n' +
-                     '### Morning\n' +
-                     '### Afternoon\n' +
-                     '### Evening\n'
+                     '---\n' +
+                     '### Morning\n\n' +
+                     '### Afternoon\n\n' +
+                     '### Evening\n\n'
 
 export async function updateDaysFromWeek(vault: Vault, date: Date) {
     let currDate = new Date(date);

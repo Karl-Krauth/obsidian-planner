@@ -5,12 +5,19 @@ import { parseTask } from 'utils';
 
 export const WEEK_FOLDER = 'Week Planners';
 const WEEK_TEMPLATE = '# Monday\n' +
+                      '---\n\n' +
                       '# Tuesday\n' +
+                      '---\n\n' +
                       '# Wednesday\n' +
+                      '---\n\n' +
                       '# Thursday\n' +
+                      '---\n\n' +
                       '# Friday\n' +
+                      '---\n\n' +
                       '# Saturday\n' +
-                      '# Sunday\n';
+                      '---\n\n' +
+                      '# Sunday\n'
+                      '---\n\n';
 
 export async function updateWeekFromDay(vault: Vault, date: Date) {
     const mondayDate = getMonday(date);
