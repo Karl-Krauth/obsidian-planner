@@ -1,9 +1,22 @@
+export function addDays(date: Date, days: number): Date {
+    let result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+}
+
+export function getMonday(date: Date): Date {
+    const d = new Date(date);
+    const day = d.getDay()
+    const diff = d.getDate() - day + (day == 0 ? -6:1);
+    return new Date(d.setDate(diff));
+}
+
 export function getNewTasks(lines: string[], tasks: Set<string>): Set<string> {
     let newTasks = new Set<string>(tasks);
     for (const line of lines) {
         const task = parseTask(line);
         if (task) {
-            newTasks.delete(task); 
+            newTasks.delete(task);
         }
     }
 
@@ -27,11 +40,20 @@ export function updateTicks(lines: string[], tasks: Set<string>): string[] {
 }
 
 export function strToDate(dateStr: string): Date {
-    const year = parseInt(dateStr.slice(0, 4));
+    let year = 0;
+    let month = 0;
+    let day = 0;
+    if (dateStr.length == 8) {
+        year = parseInt(dateStr.slice(0, 4));
+        month = parseInt(dateStr.slice(4, 6));
+        day = parseInt(dateStr.slice(6, 8));
+    } else if (dateStr.length == 6) {
+        year = parseInt(dateStr.slice(0, 4));
+        month = parseInt(dateStr.slice(4, 6));
+        day = 1;
+    }
     // Convert month to zero index.
-    const month = parseInt(dateStr.slice(4, 6)) - 1;
-    const day = parseInt(dateStr.slice(6, 8));
-    return new Date(year, month, day);
+    return new Date(year, month - 1, day);
 }
 
 export function tickTask(task: string): string {

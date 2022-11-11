@@ -1,4 +1,5 @@
 import * as day from 'day';
+import * as month from 'month';
 import * as utils from 'utils';
 import { TFile, Vault } from 'obsidian';
 import { parseTask } from 'utils';
@@ -20,7 +21,7 @@ const WEEK_TEMPLATE = '# Monday\n' +
                       '---\n\n';
 
 export async function updateWeekFromDay(vault: Vault, date: Date) {
-    const mondayDate = getMonday(date);
+    const mondayDate = utils.getMonday(date);
     const filePath = dateToFilePath(mondayDate);
     let file = vault.getAbstractFileByPath(filePath);
     if (!(file instanceof TFile)) {
@@ -32,18 +33,31 @@ export async function updateWeekFromDay(vault: Vault, date: Date) {
 }
 
 export async function updateWeeksFromMonth(vault: Vault, date: Date) {
+    let currMonday = utils.getMonday(date);
+    let currSunday = utils.addDays(currMonday, 6);
+    while (currSunday.getMonth() === date.getMonth()) {
+        const filePath = dateToFilePath(currMonday);
+        let file = vault.getAbstractFileByPath(filePath);
+        if (!(file instanceof TFile)) {
+            file = await vault.create(filePath, WEEK_TEMPLATE);
+        }
 
+        const tasks = await month.getTasks(vault, currMonday);
+        await updateTasks(vault, file as TFile, tasks);
+        currMonday = utils.addDays(currMonday, 7);
+        currSunday = utils.addDays(currSunday, 7);
+    }
 }
 
 export async function getTasks(vault: Vault, date: Date): Promise<Set<string>> {
-    const mondayDate = getMonday(date);
+    const mondayDate = utils.getMonday(date);
     const file = vault.getAbstractFileByPath(dateToFilePath(mondayDate));
     if (!(file instanceof TFile)) {
         return new Set<string>();
     }
 
-    // Get the string for the day of week we care about.
-    const diff = (date.valueOf() - mondayDate.valueOf()) / (1000 * 3600 * 24);
+    // Get the string for the day of week we care about. Round to take care of daylight savings.
+    const diff = Math.round((date.valueOf() - mondayDate.valueOf()) / (1000 * 3600 * 24));
     console.assert(diff <= 6, "Difference between days and weeks are greater than 6.");
     const weekStrings = ["mo", "tu", "we", "th", "fr", "sa", "su"];
     const dayString = weekStrings[diff];
@@ -79,20 +93,23 @@ async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
     // Read in the file.
     let lines = (await vault.read(file)).split('\n');
 
-    // Update task ticks.
+    // Update task ticks and determine which tasks are new.
     lines = utils.updateTicks(lines, tasks);
+    const newTasks = utils.getNewTasks(lines, tasks);
+
+    let output = '';
+    // Create the unassigned tasks preamble.
+    for (const task of newTasks) {
+        output += task + '\n';
+    }
+
+    // Add the original file back.
+    output += lines.join('\n') + '\n';
 
     // Write out the file.
-    await vault.modify(file, lines.join('\n'));
+    await vault.modify(file, output);
 }
 
 function dateToFilePath(date: Date): string {
     return `${WEEK_FOLDER}/${date.toISOString().slice(0,10).replace(/-/g,"")}.md`;
-}
-
-function getMonday(date: Date): Date {
-    const d = new Date(date);
-    const day = d.getDay()
-    const diff = d.getDate() - day + (day == 0 ? -6:1);
-    return new Date(d.setDate(diff));
 }

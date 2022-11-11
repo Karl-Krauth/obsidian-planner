@@ -1,8 +1,8 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
 import * as day from 'day';
 import * as month from 'month';
-import * as utils from 'utils';
+import { App, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
 import * as project from 'project';
+import * as utils from 'utils';
 import * as week from 'week';
 
 // Remember to rename these classes and interfaces!
@@ -53,28 +53,33 @@ export default class MyPlugin extends Plugin {
         const parentFolder = splitPath[0];
         const fileName = splitPath[1];
         if (parentFolder === day.DAY_FOLDER) {
-            if (!/Day Planner-\d\d\d\d\d\d\d\d/.test(fileName)) {
+            if (!/Day Planner-\d\d\d\d\d\d\d\d\.md/.test(fileName)) {
                 return;
             }
 
-            const dateStr = fileName.split('-')[1];
+            const dateStr = fileName.split('-')[1].slice(0, -3);
             const date = utils.strToDate(dateStr);
+            // Propagate changes up.
             await week.updateWeekFromDay(this.app.vault, date);
         } else if (parentFolder === week.WEEK_FOLDER) {
-            if (!/\d\d\d\d\d\d\d\d/.test(fileName)) {
+            if (!/\d\d\d\d\d\d\d\d\.md/.test(fileName)) {
                 return;
             }
 
-            const date = utils.strToDate(fileName);
+            const date = utils.strToDate(fileName.slice(0, -3));
+            // Propagate changes down.
             await day.updateDaysFromWeek(this.app.vault, date);
+            // Propagate changes up.
             await month.updateMonthFromWeek(this.app.vault, date);
         } else if (parentFolder === month.MONTH_FOLDER) {
-            if (!/\d\d\d\d\d\d/.test(fileName)) {
+            if (!/\d\d\d\d\d\d\.md/.test(fileName)) {
                 return;
             }
 
-            const date = utils.strToDate(fileName);
+            const date = utils.strToDate(fileName.slice(0, -3));
+            // Propagate changes down.
             await week.updateWeeksFromMonth(this.app.vault, date);
+            // Propagate changes up.
             await project.updateProjectsFromMonth(this.app.vault, date);
         } else if (parentFolder === project.PROJECT_FOLDER) {
             const projectName = fileName.slice(0, -3);
@@ -111,4 +116,3 @@ class SampleSettingTab extends PluginSettingTab {
                 }));
     }
 }
-

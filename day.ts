@@ -21,7 +21,7 @@ export async function updateDaysFromWeek(vault: Vault, date: Date) {
 
         const tasks = await week.getTasks(vault, currDate);
         await updateTasks(vault, file as TFile, tasks);
-        currDate.setDate(currDate.getDate() + 1);
+        currDate = utils.addDays(currDate, 1);
     }
 }
 
