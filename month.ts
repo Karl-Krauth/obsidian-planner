@@ -1,10 +1,27 @@
 import { TFile, Vault } from 'obsidian';
+import * as week from 'week';
 import * as utils from 'utils';
 
 export const MONTH_FOLDER = 'Month Planners';
 
-export async function updateMonthFromWeek(vault: Vault, date: Date) {
+const MONTH_TEMPLATE = '# Week 1\n' +
+                       '---\n\n' +
+                       '# Week 2\n' +
+                       '---\n\n' +
+                       '# Week 3\n' +
+                       '---\n\n' +
+                       '# Week 4\n' +
+                       '---\n\n';
 
+export async function updateMonthFromWeek(vault: Vault, date: Date) {
+    const filePath = dateToFilePath(date);
+    let file = vault.getAbstractFileByPath(filePath);
+    if (!(file instanceof TFile)) {
+        file = await vault.create(filePath, MONTH_TEMPLATE);
+    }
+
+    const tasks = await week.getAllTasks(vault, date);
+    await updateTasks(vault, file as TFile, tasks);
 }
 
 export async function updateMonthsFromProject(vault: Vault, project: string) {
@@ -59,6 +76,27 @@ export async function getTasks(vault: Vault, date: Date): Promise<Set<string>> {
 
     console.log(tasks);
     return tasks;
+}
+
+async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
+    // Read in the file.
+    let lines = (await vault.read(file)).split('\n');
+
+    // Update task ticks and determine which tasks are new.
+    lines = utils.updateTicks(lines, tasks);
+    const newTasks = utils.getNewTasks(lines, tasks);
+
+    let output = '';
+    // Create the unassigned tasks preamble.
+    for (const task of newTasks) {
+        output += task + '\n';
+    }
+
+    // Add the original file back.
+    output += lines.join('\n') + '\n';
+
+    // Write out the file.
+    await vault.modify(file, output);
 }
 
 function dateToFilePath(date: Date): string {
