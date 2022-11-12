@@ -1,6 +1,7 @@
 import { TFile, Vault } from 'obsidian';
-import * as week from 'week';
+import * as project from 'project';
 import * as utils from 'utils';
+import * as week from 'week';
 
 export const MONTH_FOLDER = 'Month Planners';
 
@@ -24,8 +25,55 @@ export async function updateMonthFromWeek(vault: Vault, date: Date) {
     await updateTasks(vault, file as TFile, tasks);
 }
 
-export async function updateMonthsFromProject(vault: Vault, project: string) {
+export async function updateMonthsFromProject(vault: Vault, projectName: string) {
+    let tasks = await project.getTasks(vault, projectName);
+    let currMonthFile: TFile | null = null;
 
+    for (const file of vault.getMarkdownFiles()) {
+        if (file.path.slice(0, MONTH_FOLDER.length) != MONTH_FOLDER) {
+            continue;
+        }
+
+        if (!/\d\d\d\d\d\d/.test(file.basename)) {
+            continue;
+        }
+
+        const date = utils.strToDate(file.basename);
+        const currMonth = utils.addDays(utils.getMonday(new Date()), 6).getMonth();
+        if (date.getMonth() < currMonth) {
+            continue;
+        }
+
+        if (date.getMonth() === currMonth) {
+            currMonthFile = file;
+        }
+
+        // Read in the file.
+        let lines = (await vault.read(file)).split('\n');
+
+        // Update task ticks and remove tasks owned by this month.
+        lines = utils.updateTicks(lines, tasks);
+        for (const line of lines) {
+            const task = utils.parseTask(line);
+            if (task) {
+                tasks.delete(task);
+            }
+        }
+
+        await vault.modify(file, lines.join('\n'));
+    }
+
+
+    // Read in the file for this month if it exists.
+    if (currMonthFile) {
+        const input = await vault.read(currMonthFile);
+        let output = '';
+        for (const task of tasks) {
+            output += task + '\n';
+        }
+
+        await vault.modify(currMonthFile, output + input);
+    }
 }
 
 export async function getTasks(vault: Vault, date: Date): Promise<Set<string>> {
@@ -46,9 +94,6 @@ export async function getTasks(vault: Vault, date: Date): Promise<Set<string>> {
     const diff = Math.round((monday.valueOf() - firstMonday.valueOf()) / (1000 * 3600 * 24 * 7));
     const weekStrings = ["week 1", "week 2", "week 3", "week 4", "week 5"];
     const weekString = weekStrings[diff];
-    console.log(monday, firstMonday);
-    console.log(diff);
-    console.log(weekString);
 
     const lines = (await vault.read(file)).split("\n");
     const regexp = new RegExp(String.raw`^#+ +${weekString}`);
@@ -74,7 +119,6 @@ export async function getTasks(vault: Vault, date: Date): Promise<Set<string>> {
         }
     }
 
-    console.log(tasks);
     return tasks;
 }
 
