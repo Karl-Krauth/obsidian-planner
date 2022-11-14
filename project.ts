@@ -8,7 +8,7 @@ export async function updateProjectsFromMonth(vault: Vault, date: Date) {
     let projectTasks = new Map<string, Set<string>>();
     const tasks = await month.getAllTasks(vault, date)
     for (let task of tasks) {
-        const projectMatch = task.match(/#([^\s]+)/);
+        const projectMatch = task.match(/\[([^\s]+)\]\([^\s]+\)/);
         if (!projectMatch) {
             continue;
         }
@@ -20,12 +20,12 @@ export async function updateProjectsFromMonth(vault: Vault, date: Date) {
             projectTasks.set(project, taskList);
         }
 
-        task = task.replace(/\s#[^\s]+/, '');
+        task = task.replace(/\s\[[^\s]+\]\([^\s]+\)/, '');
         taskList.add(task);
     }
 
     for (const [project, taskList] of projectTasks) {
-        const file = vault.getAbstractFileByPath(PROJECT_FOLDER + '/' + project + '.md');
+        const file = vault.getAbstractFileByPath(getProjectPath(project));
         if (!(file instanceof TFile)) {
             continue;
         }
@@ -52,7 +52,8 @@ export async function updateProjectsFromMonth(vault: Vault, date: Date) {
 }
 
 export async function getTasks(vault: Vault, project: string): Promise<Set<string>> {
-    const file = vault.getAbstractFileByPath(PROJECT_FOLDER + '/' + project + '.md');
+    const filePath = getProjectPath(project);
+    const file = vault.getAbstractFileByPath(filePath);
     if (!(file instanceof TFile)) {
         return new Set<string>();
     }
@@ -63,9 +64,14 @@ export async function getTasks(vault: Vault, project: string): Promise<Set<strin
     for (const line of lines) {
         const task = utils.parseTask(line);
         if (task) {
-            tasks.add(task + ' #' + project.replace(/\s/g, '-'));
+            tasks.add(task + ` [${project.replace(/\s/g, '-')}](${filePath})`);
         }
     }
 
     return tasks;
 }
+
+function getProjectPath(project: string): string {
+    return PROJECT_FOLDER + '/' + project + '.md';
+}
+
