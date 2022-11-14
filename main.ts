@@ -41,9 +41,28 @@ export default class MyPlugin extends Plugin {
     }
 
     createFiles() {
-        const date = new Date();
+        let date = new Date();
         let path = day.dateToFilePath(date)
-        console.log(date, path);
+        if (!this.app.vault.getAbstractFileByPath(path)) {
+            // Create today's file.
+            this.app.vault.create(path, day.DAY_TEMPLATE);
+        }
+
+        path = week.dateToFilePath(date)
+        if (!this.app.vault.getAbstractFileByPath(path)) {
+            // Create this week's file.
+            this.app.vault.create(path, week.WEEK_TEMPLATE);
+        }
+
+        path = month.dateToFilePath(date)
+        if (!this.app.vault.getAbstractFileByPath(path)) {
+            // Create this month's file.
+            this.app.vault.create(path, month.MONTH_TEMPLATE);
+        }
+
+        // Also create files for tomorrow.
+        date = utils.addDays(date, 1);
+        path = day.dateToFilePath(date)
         if (!this.app.vault.getAbstractFileByPath(path)) {
             // Create today's file.
             this.app.vault.create(path, day.DAY_TEMPLATE);
