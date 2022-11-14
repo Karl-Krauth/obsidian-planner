@@ -118,16 +118,10 @@ export async function getTasks(vault: Vault, date: Date): Promise<Set<string>> {
     }
 
     // Get the string for the week we care about. Round to take care of daylight savings.
-    const monday = utils.getMonday(date);
-    const sunday = utils.addDays(monday, 6);
-    const firstDay = utils.addDays(sunday, -sunday.getDate() + 1);
-    const firstMonday = utils.getMonday(firstDay);
-    const diff = Math.round((monday.valueOf() - firstMonday.valueOf()) / (1000 * 3600 * 24 * 7));
-    const weekStrings = ["week 1", "week 2", "week 3", "week 4", "week 5"];
-    const weekString = weekStrings[diff];
+    const weekString = `week ${week.getWeekNum(date) + 1}`;
 
     const lines = (await vault.read(file)).split("\n");
-    const regexp = new RegExp(String.raw`^#+ +${weekString}`);
+    const regexp = new RegExp(String.raw`^#+ +\[?${weekString}\]?`);
     // Iterate until we reach the start of the relevant weekday.
     let i = 0;
     for (; i < lines.length; i++) {
@@ -162,13 +156,23 @@ async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
     const newTasks = utils.getNewTasks(lines, tasks);
 
     let output = '';
+    // Account for the case where we have a heading.
+    if (lines.length >= 1 && !/^#+ +\[?week/.test(lines[0].toLowerCase())) {
+        output += lines[0] + '\n';
+        lines.shift();
+        if (lines.length >= 1 && /^---/.test(lines[0])) {
+            output += lines[0] + '\n';
+            lines.shift();
+        }
+    }
+
     // Create the unassigned tasks preamble.
     for (const task of newTasks) {
         output += task + '\n';
     }
 
     // Add the original file back.
-    output += lines.join('\n') + '\n';
+    output += lines.join('\n');
 
     // Write out the file.
     await vault.modify(file, output);

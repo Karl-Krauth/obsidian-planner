@@ -8,11 +8,20 @@ export const WEEK_FOLDER = 'Weeks';
 
 export function getWeekTemplate(date: Date): string {
     const monday = utils.getMonday(date);
-    let out = '';
+    const sunday = utils.addDays(monday, 6);
+
+    // Add a link to the parent month and which week this is.
+    const monthNum = sunday.getMonth();
+    const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+    let out = `# Week ${getWeekNum(monday) + 1} [${months[monthNum]}](${month.dateToFilePath(date)}) ${sunday.getFullYear()}\n`
+    out += '---\n';
+
+    // Add each weekday.
     const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     for (let i = 0; i < 7; i++) {
         const weekDate = utils.addDays(monday, i);
-        out += `# [${weekDays[i]}](${day.dateToFilePath(weekDate)})\n`;
+        out += `## [${weekDays[i]}](${day.dateToFilePath(weekDate)})\n`;
         out += '---\n\n';
     }
 
@@ -77,11 +86,11 @@ export async function getTasks(vault: Vault, date: Date): Promise<Set<string>> {
     // Get the string for the day of week we care about. Round to take care of daylight savings.
     const diff = Math.round((date.valueOf() - mondayDate.valueOf()) / (1000 * 3600 * 24));
     console.assert(diff <= 6, "Difference between days and weeks are greater than 6.");
-    const weekStrings = ["mo", "tu", "we", "th", "fr", "sa", "su"];
+    const weekStrings = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
     const dayString = weekStrings[diff];
 
     const lines = (await vault.read(file)).split("\n");
-    const regexp = new RegExp(String.raw`^#+ +${dayString}`);
+    const regexp = new RegExp(String.raw`^#+ +\[?${dayString}\]?`);
     // Iterate until we reach the start of the relevant weekday.
     let i = 0;
     for (; i < lines.length; i++) {
@@ -116,13 +125,34 @@ async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
     const newTasks = utils.getNewTasks(lines, tasks);
 
     let output = '';
+    // Account for the case where we have a heading.
+    if (lines.length >= 1) {
+        const weekStrings = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+        let matches = false;
+        for (const weekString of weekStrings) {
+            const regex = new RegExp(String.raw`^#+ +\[?${weekString}`);
+            if (regex.test(lines[0])) {
+                matches = true;
+            }
+        }
+
+        if (!matches) {
+            output += lines[0] + '\n';
+            lines.shift();
+            if (lines.length >= 1 && /^---/.test(lines[0])) {
+                output += lines[0] + '\n';
+                lines.shift();
+            }
+        }
+    }
+
     // Create the unassigned tasks preamble.
     for (const task of newTasks) {
         output += task + '\n';
     }
 
     // Add the original file back.
-    output += lines.join('\n') + '\n';
+    output += lines.join('\n');
 
     // Write out the file.
     await vault.modify(file, output);
@@ -134,4 +164,13 @@ export function dateToFilePath(date: Date): string {
     const month = (new String(monday.getMonth() + 1)).padStart(2, '0');
     const day = (new String(monday.getDate())).padStart(2, '0');
     return `${WEEK_FOLDER}/${year}-${month}-${day}.md`;
+}
+
+export function getWeekNum(date: Date): number {
+    const monday = utils.getMonday(date);
+    const sunday = utils.addDays(monday, 6);
+    const firstDay = utils.addDays(sunday, -sunday.getDate() + 1);
+    const firstMonday = utils.getMonday(firstDay);
+    // Round to account for daylight savings.
+    return Math.round((monday.valueOf() - firstMonday.valueOf()) / (1000 * 3600 * 24 * 7));
 }
