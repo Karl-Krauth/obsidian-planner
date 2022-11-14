@@ -3,11 +3,11 @@ import * as utils from 'utils';
 import * as week from 'week';
 
 export const DAY_FOLDER = 'Day Planners'
-const DAY_TEMPLATE = '## Day Planner\n' +
-                     '---\n' +
-                     '### Morning\n\n' +
-                     '### Afternoon\n\n' +
-                     '### Evening\n\n'
+export const DAY_TEMPLATE = '## Day Planner\n' +
+                            '---\n' +
+                            '### Morning\n\n' +
+                            '### Afternoon\n\n' +
+                            '### Evening\n\n'
 
 export async function updateDaysFromWeek(vault: Vault, date: Date) {
     let currDate = new Date(date);
@@ -15,7 +15,7 @@ export async function updateDaysFromWeek(vault: Vault, date: Date) {
         const filePath = dateToFilePath(currDate);
         let file = vault.getAbstractFileByPath(filePath);
         if (!(file instanceof TFile)) {
-            file = await vault.create(filePath, DAY_TEMPLATE);
+            continue;
         }
 
         const tasks = await week.getTasks(vault, currDate);
@@ -71,6 +71,9 @@ function removeTime(line: string): string {
     return line.replace(/^(\s*- \[[xX ]\])\d\d:\d\d\s*/, '$1');
 }
 
-function dateToFilePath(date: Date): string {
-    return `${DAY_FOLDER}/Day Planner-${date.toISOString().slice(0,10).replace(/-/g,"")}.md`;
+export function dateToFilePath(date: Date): string {
+    const year = new String(date.getFullYear());
+    const month = (new String(date.getMonth() + 1)).padStart(2, '0');
+    const day = (new String(date.getDate()).padStart(2, '0'));
+    return `${DAY_FOLDER}/${year}-${month}-${day}.md`;
 }

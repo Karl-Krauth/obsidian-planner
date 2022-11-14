@@ -13,7 +13,7 @@ export async function updateProjectsFromMonth(vault: Vault, date: Date) {
             continue;
         }
 
-        const project = projectMatch[1];
+        const project = projectMatch[1].replace(/-/g, ' ');
         let taskList = projectTasks.get(project);
         if (!taskList) {
             taskList = new Set<string>();
@@ -63,7 +63,7 @@ export async function getTasks(vault: Vault, project: string): Promise<Set<strin
     for (const line of lines) {
         const task = utils.parseTask(line);
         if (task) {
-            tasks.add(task + ' #' + project);
+            tasks.add(task + ' #' + project.replace(/\s/g, '-'));
         }
     }
 

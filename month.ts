@@ -5,20 +5,20 @@ import * as week from 'week';
 
 export const MONTH_FOLDER = 'Month Planners';
 
-const MONTH_TEMPLATE = '# Week 1\n' +
-                       '---\n\n' +
-                       '# Week 2\n' +
-                       '---\n\n' +
-                       '# Week 3\n' +
-                       '---\n\n' +
-                       '# Week 4\n' +
-                       '---\n\n';
+export const MONTH_TEMPLATE = '# Week 1\n' +
+                              '---\n\n' +
+                              '# Week 2\n' +
+                              '---\n\n' +
+                              '# Week 3\n' +
+                              '---\n\n' +
+                              '# Week 4\n' +
+                              '---\n\n';
 
 export async function updateMonthFromWeek(vault: Vault, date: Date) {
     const filePath = dateToFilePath(date);
     let file = vault.getAbstractFileByPath(filePath);
     if (!(file instanceof TFile)) {
-        file = await vault.create(filePath, MONTH_TEMPLATE);
+        return;
     }
 
     const tasks = await week.getAllTasks(vault, date);
@@ -34,7 +34,7 @@ export async function updateMonthsFromProject(vault: Vault, projectName: string)
             continue;
         }
 
-        if (!/\d\d\d\d\d\d/.test(file.basename)) {
+        if (!/\d\d\d\d-\d\d/.test(file.basename)) {
             continue;
         }
 
@@ -96,17 +96,13 @@ export async function getAllTasks(vault: Vault, date: Date): Promise<Set<string>
 }
 
 export async function getTasks(vault: Vault, date: Date): Promise<Set<string>> {
-    const monday = utils.getMonday(date);
-    if (monday.getTime() !== date.getTime()) {
-        return new Set<string>();
-    }
-
     const file = vault.getAbstractFileByPath(dateToFilePath(date));
     if (!(file instanceof TFile)) {
         return new Set<string>();
     }
 
     // Get the string for the week we care about. Round to take care of daylight savings.
+    const monday = utils.getMonday(date);
     const sunday = utils.addDays(monday, 6);
     const firstDay = utils.addDays(sunday, -sunday.getDate() + 1);
     const firstMonday = utils.getMonday(firstDay);
@@ -162,8 +158,9 @@ async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
     await vault.modify(file, output);
 }
 
-function dateToFilePath(date: Date): string {
-    const sunday = utils.addDays(date, 6);
+export function dateToFilePath(date: Date): string {
+    const monday = utils.getMonday(date);
+    const sunday = utils.addDays(monday, 6);
     const firstDay = utils.addDays(sunday, -sunday.getDate() + 1);
-    return `${MONTH_FOLDER}/${firstDay.toISOString().slice(0, 7).replace(/-/g, "")}.md`;
+    return `${MONTH_FOLDER}/${firstDay.getFullYear()}-${(new String(firstDay.getMonth() + 1)).padStart(2, '0')}.md`;
 }

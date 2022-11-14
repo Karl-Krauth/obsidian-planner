@@ -20,11 +20,12 @@ export default class MyPlugin extends Plugin {
 
     async onload() {
         await this.loadSettings();
+        this.createFiles();
 
         // This adds a settings tab so the user can configure various aspects of the plugin
         this.addSettingTab(new SampleSettingTab(this.app, this));
 
-        this.registerEvent(this.app.workspace.on('file-open', (file) => this.updateFile(file)));
+        this.registerEvent(this.app.workspace.on('file-open', (file) => this.updateFiles(file)));
     }
 
     onunload() {
@@ -39,7 +40,29 @@ export default class MyPlugin extends Plugin {
         await this.saveData(this.settings);
     }
 
-    async updateFile(file: TFile | null) {
+    createFiles() {
+        const date = new Date();
+        let path = day.dateToFilePath(date)
+        console.log(date, path);
+        if (!this.app.vault.getAbstractFileByPath(path)) {
+            // Create today's file.
+            this.app.vault.create(path, day.DAY_TEMPLATE);
+        }
+
+        path = week.dateToFilePath(date)
+        if (!this.app.vault.getAbstractFileByPath(path)) {
+            // Create this week's file.
+            this.app.vault.create(path, week.WEEK_TEMPLATE);
+        }
+
+        path = month.dateToFilePath(date)
+        if (!this.app.vault.getAbstractFileByPath(path)) {
+            // Create this month's file.
+            this.app.vault.create(path, month.MONTH_TEMPLATE);
+        }
+    }
+
+    async updateFiles(file: TFile | null) {
         const lastFiles = this.app.workspace.getLastOpenFiles();
         if (!lastFiles) {
             return;
@@ -53,7 +76,7 @@ export default class MyPlugin extends Plugin {
         const parentFolder = splitPath[0];
         const fileName = splitPath[1];
         if (parentFolder === day.DAY_FOLDER) {
-            if (!/Day Planner-\d\d\d\d\d\d\d\d\.md/.test(fileName)) {
+            if (!/Day Planner-\d\d\d\d-\d\d-\d\d\.md/.test(fileName)) {
                 return;
             }
 
@@ -62,7 +85,7 @@ export default class MyPlugin extends Plugin {
             // Propagate changes up.
             await week.updateWeekFromDay(this.app.vault, date);
         } else if (parentFolder === week.WEEK_FOLDER) {
-            if (!/\d\d\d\d\d\d\d\d\.md/.test(fileName)) {
+            if (!/\d\d\d\d-\d\d-\d\d\.md/.test(fileName)) {
                 return;
             }
 
@@ -72,7 +95,7 @@ export default class MyPlugin extends Plugin {
             // Propagate changes up.
             await month.updateMonthFromWeek(this.app.vault, date);
         } else if (parentFolder === month.MONTH_FOLDER) {
-            if (!/\d\d\d\d\d\d\.md/.test(fileName)) {
+            if (!/\d\d\d\d-\d\d\.md/.test(fileName)) {
                 return;
             }
 

@@ -5,27 +5,26 @@ import { TFile, Vault } from 'obsidian';
 import { parseTask } from 'utils';
 
 export const WEEK_FOLDER = 'Week Planners';
-const WEEK_TEMPLATE = '# Monday\n' +
-                      '---\n\n' +
-                      '# Tuesday\n' +
-                      '---\n\n' +
-                      '# Wednesday\n' +
-                      '---\n\n' +
-                      '# Thursday\n' +
-                      '---\n\n' +
-                      '# Friday\n' +
-                      '---\n\n' +
-                      '# Saturday\n' +
-                      '---\n\n' +
-                      '# Sunday\n'
-                      '---\n\n';
+export const WEEK_TEMPLATE = '# Monday\n' +
+                             '---\n\n' +
+                             '# Tuesday\n' +
+                             '---\n\n' +
+                             '# Wednesday\n' +
+                             '---\n\n' +
+                             '# Thursday\n' +
+                             '---\n\n' +
+                             '# Friday\n' +
+                             '---\n\n' +
+                             '# Saturday\n' +
+                             '---\n\n' +
+                             '# Sunday\n'
+                             '---\n\n';
 
 export async function updateWeekFromDay(vault: Vault, date: Date) {
-    const mondayDate = utils.getMonday(date);
-    const filePath = dateToFilePath(mondayDate);
+    const filePath = dateToFilePath(date);
     let file = vault.getAbstractFileByPath(filePath);
     if (!(file instanceof TFile)) {
-        file = await vault.create(filePath, WEEK_TEMPLATE);
+        return;
     }
 
     const tasks = await day.getTasks(vault, date);
@@ -39,7 +38,7 @@ export async function updateWeeksFromMonth(vault: Vault, date: Date) {
         const filePath = dateToFilePath(currMonday);
         let file = vault.getAbstractFileByPath(filePath);
         if (!(file instanceof TFile)) {
-            file = await vault.create(filePath, WEEK_TEMPLATE);
+            continue;
         }
 
         const tasks = await month.getTasks(vault, currMonday);
@@ -70,7 +69,7 @@ export async function getAllTasks(vault: Vault, date: Date): Promise<Set<string>
 
 export async function getTasks(vault: Vault, date: Date): Promise<Set<string>> {
     const mondayDate = utils.getMonday(date);
-    const file = vault.getAbstractFileByPath(dateToFilePath(mondayDate));
+    const file = vault.getAbstractFileByPath(dateToFilePath(date));
     if (!(file instanceof TFile)) {
         return new Set<string>();
     }
@@ -129,6 +128,10 @@ async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
     await vault.modify(file, output);
 }
 
-function dateToFilePath(date: Date): string {
-    return `${WEEK_FOLDER}/${date.toISOString().slice(0,10).replace(/-/g,"")}.md`;
+export function dateToFilePath(date: Date): string {
+    const monday = utils.getMonday(date);
+    const year = new String(monday.getFullYear());
+    const month = (new String(monday.getMonth() + 1)).padStart(2, '0');
+    const day = (new String(monday.getDate())).padStart(2, '0');
+    return `${WEEK_FOLDER}/${year}-${month}-${day}.md`;
 }
