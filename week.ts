@@ -83,8 +83,8 @@ export async function getTasks(vault: Vault, date: Date): Promise<Set<string>> {
         return new Set<string>();
     }
 
-    // Get the string for the day of week we care about. Round to take care of daylight savings.
-    const diff = Math.round((date.valueOf() - mondayDate.valueOf()) / (1000 * 3600 * 24));
+    const diff = day.getDayNum(date);
+
     console.assert(diff <= 6, "Difference between days and weeks are greater than 6.");
     const weekStrings = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
     const dayString = weekStrings[diff];

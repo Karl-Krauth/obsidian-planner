@@ -14,7 +14,7 @@ export function getDayTemplate(date: Date): string {
     const months = ['January', 'February', 'March', 'April', 'May', 'June',
                     'July', 'August', 'September', 'October', 'November', 'December'];
     const monthPath = month.dateToFilePath(date);
-    const weekNum = week.getWeekNum(date)
+    const weekNum = getDayNum(date)
     const weekDay = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][weekNum];
     const weekPath = week.dateToFilePath(date);
     let out = `# ${weekDay} [Week ${weekNum + 1}](${weekPath}) [${months[monthNum]}](${monthPath}) ${sunday.getFullYear()}\n`
@@ -72,6 +72,18 @@ async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
     let newTasks = utils.getNewTasks(timelessLines, tasks);
 
     let output = '';
+    // Account for the case where we have a heading.
+    if (lines.length >= 1) {
+        if (!/^#+Day Planner/.test(lines[0]) && /^#+/.test(lines[0])) {
+            output += lines[0] + '\n';
+            lines.shift();
+            if (lines.length >= 1 && /^---/.test(lines[0])) {
+                output += lines[0] + '\n';
+                lines.shift();
+            }
+        }
+    }
+
     // Create the unassigned tasks preamble.
     for (const task of newTasks) {
         output += task + '\n';
@@ -88,6 +100,12 @@ async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
 
 function removeTime(line: string): string {
     return line.replace(/^(\s*- \[[xX ]\])\d\d:\d\d\s*/, '$1');
+}
+
+export function getDayNum(date: Date): number {
+    const monday = utils.getMonday(date);
+    // Get the string for the day of week we care about. Round to take care of daylight savings.
+    return Math.round((date.valueOf() - monday.valueOf()) / (1000 * 3600 * 24));
 }
 
 export function dateToFilePath(date: Date): string {
