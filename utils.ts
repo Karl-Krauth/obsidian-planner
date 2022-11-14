@@ -43,13 +43,13 @@ export function strToDate(dateStr: string): Date {
     let year = 0;
     let month = 0;
     let day = 0;
-    if (dateStr.length == 8) {
+    if (dateStr.length == 10) {
         year = parseInt(dateStr.slice(0, 4));
-        month = parseInt(dateStr.slice(4, 6));
-        day = parseInt(dateStr.slice(6, 8));
-    } else if (dateStr.length == 6) {
+        month = parseInt(dateStr.slice(5, 7));
+        day = parseInt(dateStr.slice(8, 10));
+    } else if (dateStr.length == 7) {
         year = parseInt(dateStr.slice(0, 4));
-        month = parseInt(dateStr.slice(4, 6));
+        month = parseInt(dateStr.slice(5, 7));
         day = 1;
     }
     // Convert month to zero index.

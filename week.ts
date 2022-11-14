@@ -37,12 +37,11 @@ export async function updateWeeksFromMonth(vault: Vault, date: Date) {
     while (currSunday.getMonth() === date.getMonth()) {
         const filePath = dateToFilePath(currMonday);
         let file = vault.getAbstractFileByPath(filePath);
-        if (!(file instanceof TFile)) {
-            continue;
+        if (file instanceof TFile) {
+            const tasks = await month.getTasks(vault, currMonday);
+            await updateTasks(vault, file as TFile, tasks);
         }
 
-        const tasks = await month.getTasks(vault, currMonday);
-        await updateTasks(vault, file as TFile, tasks);
         currMonday = utils.addDays(currMonday, 7);
         currSunday = utils.addDays(currSunday, 7);
     }
