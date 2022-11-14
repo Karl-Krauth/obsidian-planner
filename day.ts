@@ -1,13 +1,32 @@
 import { TFile, Vault } from 'obsidian';
+import * as month from 'month';
 import * as utils from 'utils';
 import * as week from 'week';
 
 export const DAY_FOLDER = 'Days'
-export const DAY_TEMPLATE = '## Day Planner\n' +
-                            '---\n' +
-                            '### Morning\n\n' +
-                            '### Afternoon\n\n' +
-                            '### Evening\n\n'
+
+export function getDayTemplate(date: Date): string {
+    const monday = utils.getMonday(date);
+    const sunday = utils.addDays(monday, 6);
+
+    // Add a link to the parent month and which week this is.
+    const monthNum = sunday.getMonth();
+    const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+    const monthPath = month.dateToFilePath(date);
+    const weekNum = week.getWeekNum(date)
+    const weekDay = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][weekNum];
+    const weekPath = week.dateToFilePath(date);
+    let out = `# ${weekDay} [Week ${weekNum + 1}](${weekPath}) [${months[monthNum]}](${monthPath}) ${sunday.getFullYear()}\n`
+    out += '---\n';
+    out += '## Day Planner\n' +
+           '---\n' +
+           '### Morning\n\n' +
+           '### Afternoon\n\n' +
+           '### Evening\n\n'
+
+    return out;
+}
 
 export async function updateDaysFromWeek(vault: Vault, date: Date) {
     let currDate = new Date(date);

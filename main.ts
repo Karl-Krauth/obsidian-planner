@@ -63,7 +63,7 @@ export default class MyPlugin extends Plugin {
         let path = day.dateToFilePath(date)
         if (!this.app.vault.getAbstractFileByPath(path)) {
             // Create today's file.
-            this.app.vault.create(path, day.DAY_TEMPLATE);
+            this.app.vault.create(path, day.getDayTemplate(date));
         }
 
         path = week.dateToFilePath(date)
@@ -95,6 +95,37 @@ export default class MyPlugin extends Plugin {
     }
 
     async updateFiles(file: TFile | null) {
+        // Handle the case where we've opened an empty relevant file.
+        if (file) {
+            const splitPath = file.path.split('/');
+            const parentFolder = splitPath[0];
+            const fileName = splitPath[1];
+            if (parentFolder === day.DAY_FOLDER &&
+                /\d\d\d\d-\d\d-\d\d\.md/.test(fileName)) {
+                const date = utils.strToDate(fileName.slice(0, -3));
+                const content = await this.app.vault.read(file);
+                if (!content) {
+                    this.app.vault.modify(file, day.getDayTemplate(date));
+                }
+            } else if (parentFolder === week.WEEK_FOLDER &&
+                       /\d\d\d\d-\d\d-\d\d\.md/.test(fileName)) {
+                const date = utils.strToDate(fileName.slice(0, -3));
+                const content = await this.app.vault.read(file);
+                if (!content) {
+                    this.app.vault.modify(file, week.getWeekTemplate(date));
+                }
+            } else if (parentFolder === month.MONTH_FOLDER &&
+                       /\d\d\d\d-\d\d.md/.test(fileName)) {
+                const date = utils.strToDate(fileName.slice(0, -3));
+                const content = await this.app.vault.read(file);
+                if (!content) {
+                    this.app.vault.modify(file, month.getMonthTemplate(date));
+                }
+            }
+        }
+
+
+        // Handle the case where we just navigated away from a relevant file.
         const lastFiles = this.app.workspace.getLastOpenFiles();
         if (!lastFiles) {
             return;
