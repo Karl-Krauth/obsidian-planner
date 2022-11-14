@@ -76,6 +76,25 @@ export async function updateMonthsFromProject(vault: Vault, projectName: string)
     }
 }
 
+export async function getAllTasks(vault: Vault, date: Date): Promise<Set<string>> {
+    const file = vault.getAbstractFileByPath(dateToFilePath(date));
+    if (!(file instanceof TFile)) {
+        return new Set<string>();
+    }
+
+    // Read in all the tasks.
+    const lines = (await vault.read(file)).split("\n");
+    let tasks = new Set<string>();
+    for (const line of lines) {
+        const task = utils.parseTask(line);
+        if (task) {
+            tasks.add(task);
+        }
+    }
+
+    return tasks;
+}
+
 export async function getTasks(vault: Vault, date: Date): Promise<Set<string>> {
     const monday = utils.getMonday(date);
     if (monday.getTime() !== date.getTime()) {

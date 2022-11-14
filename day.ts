@@ -12,7 +12,6 @@ const DAY_TEMPLATE = '## Day Planner\n' +
 export async function updateDaysFromWeek(vault: Vault, date: Date) {
     let currDate = new Date(date);
     for (let i = 0; i < 7; i++) {
-        console.log(currDate);
         const filePath = dateToFilePath(currDate);
         let file = vault.getAbstractFileByPath(filePath);
         if (!(file instanceof TFile)) {
