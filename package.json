@@ -1,7 +1,7 @@
 {
-    "name": "obsidian-sample-plugin",
-    "version": "1.0.0",
-    "description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+    "name": "Task Planner",
+    "version": "0.0.1",
+    "description": "A planning plugin that keeps track of tasks across time periods and projects.",
     "main": "main.js",
     "scripts": {
         "ts-types": "tsc -noEmit -skipLibCheck",

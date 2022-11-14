@@ -90,9 +90,7 @@ async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
     }
 
     // Add the original file back.
-    for (const line of lines) {
-        output += line + '\n';
-    }
+    output += lines.join('\n');
 
     // Write out the file.
     await vault.modify(file, output);
