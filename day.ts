@@ -52,7 +52,7 @@ export async function getTasks(vault: Vault, date: Date): Promise<Set<string>> {
 
     const lines = (await vault.read(file)).split('\n');
     for (const line of lines) {
-        const task = utils.parseTask(removeTime(line))
+        const task = utils.parseTask(utils.removeTime(line))
         if (task) {
             tasks.add(task);
         }
@@ -68,7 +68,7 @@ async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
     // Update task ticks and determine which tasks are new.
     lines = utils.updateTicks(lines, tasks);
 
-    const timelessLines = lines.map(removeTime);
+    const timelessLines = lines.map(utils.removeTime);
     let newTasks = utils.getNewTasks(timelessLines, tasks);
 
     let output = '';
@@ -96,10 +96,6 @@ async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
 
     // Write out the file.
     await vault.modify(file, output);
-}
-
-function removeTime(line: string): string {
-    return line.replace(/^(\s*- \[[xX ]\])\d\d:\d\d\s*/, '$1');
 }
 
 export function getDayNum(date: Date): number {

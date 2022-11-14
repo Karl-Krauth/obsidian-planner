@@ -26,7 +26,7 @@ export function getNewTasks(lines: string[], tasks: Set<string>): Set<string> {
 export function updateTicks(lines: string[], tasks: Set<string>): string[] {
     let newLines: string[] = [];
     for (const line of lines) {
-        const task = parseTask(line);
+        const task = parseTask(removeTime(line));
         if (task && tasks.has(tickTask(task))) {
             newLines.push(tickTask(line));
         } else if (task && tasks.has(untickTask(task))) {
@@ -37,6 +37,10 @@ export function updateTicks(lines: string[], tasks: Set<string>): string[] {
     }
 
     return newLines;
+}
+
+export function removeTime(line: string): string {
+    return line.replace(/^(\s*- \[[xX ]\] )\d\d:\d\d\s*/, '$1');
 }
 
 export function strToDate(dateStr: string): Date {
