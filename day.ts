@@ -2,7 +2,7 @@ import { TFile, Vault } from 'obsidian';
 import * as utils from 'utils';
 import * as week from 'week';
 
-export const DAY_FOLDER = 'Day Planners'
+export const DAY_FOLDER = 'Days'
 export const DAY_TEMPLATE = '## Day Planner\n' +
                             '---\n' +
                             '### Morning\n\n' +

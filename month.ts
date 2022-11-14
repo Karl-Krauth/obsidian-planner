@@ -3,7 +3,7 @@ import * as project from 'project';
 import * as utils from 'utils';
 import * as week from 'week';
 
-export const MONTH_FOLDER = 'Month Planners';
+export const MONTH_FOLDER = 'Months';
 
 export const MONTH_TEMPLATE = '# Week 1\n' +
                               '---\n\n' +

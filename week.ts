@@ -4,21 +4,20 @@ import * as utils from 'utils';
 import { TFile, Vault } from 'obsidian';
 import { parseTask } from 'utils';
 
-export const WEEK_FOLDER = 'Week Planners';
-export const WEEK_TEMPLATE = '# Monday\n' +
-                             '---\n\n' +
-                             '# Tuesday\n' +
-                             '---\n\n' +
-                             '# Wednesday\n' +
-                             '---\n\n' +
-                             '# Thursday\n' +
-                             '---\n\n' +
-                             '# Friday\n' +
-                             '---\n\n' +
-                             '# Saturday\n' +
-                             '---\n\n' +
-                             '# Sunday\n'
-                             '---\n\n';
+export const WEEK_FOLDER = 'Weeks';
+
+export function getWeekTemplate(date: Date): string {
+    const monday = utils.getMonday(date);
+    let out = '';
+    const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    for (let i = 0; i < 7; i++) {
+        const weekDate = utils.addDays(monday, i);
+        out += `# [${weekDays[i]}](${day.dateToFilePath(weekDate)})\n`;
+        out += '---\n\n';
+    }
+
+    return out;
+}
 
 export async function updateWeekFromDay(vault: Vault, date: Date) {
     const filePath = dateToFilePath(date);

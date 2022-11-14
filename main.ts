@@ -20,7 +20,7 @@ export default class MyPlugin extends Plugin {
 
     async onload() {
         await this.loadSettings();
-        this.createFiles();
+        await this.createFiles();
 
         // This adds a settings tab so the user can configure various aspects of the plugin
         this.addSettingTab(new SampleSettingTab(this.app, this));
@@ -40,7 +40,25 @@ export default class MyPlugin extends Plugin {
         await this.saveData(this.settings);
     }
 
-    createFiles() {
+    async createFiles() {
+        // Create folders if they don't exist.
+        if (!this.app.vault.getAbstractFileByPath(day.DAY_FOLDER)) {
+            await this.app.vault.createFolder(day.DAY_FOLDER);
+        }
+
+        if (!this.app.vault.getAbstractFileByPath(week.WEEK_FOLDER)) {
+            await this.app.vault.createFolder(week.WEEK_FOLDER);
+        }
+
+        if (!this.app.vault.getAbstractFileByPath(month.MONTH_FOLDER)) {
+            await this.app.vault.createFolder(month.MONTH_FOLDER);
+        }
+
+        if (!this.app.vault.getAbstractFileByPath(project.PROJECT_FOLDER)) {
+            await this.app.vault.createFolder(project.PROJECT_FOLDER);
+        }
+
+
         let date = new Date();
         let path = day.dateToFilePath(date)
         if (!this.app.vault.getAbstractFileByPath(path)) {
@@ -51,33 +69,28 @@ export default class MyPlugin extends Plugin {
         path = week.dateToFilePath(date)
         if (!this.app.vault.getAbstractFileByPath(path)) {
             // Create this week's file.
-            this.app.vault.create(path, week.WEEK_TEMPLATE);
+            await this.app.vault.create(path, week.getWeekTemplate(date));
         }
 
         path = month.dateToFilePath(date)
         if (!this.app.vault.getAbstractFileByPath(path)) {
             // Create this month's file.
-            this.app.vault.create(path, month.MONTH_TEMPLATE);
+            await this.app.vault.create(path, month.MONTH_TEMPLATE);
         }
 
-        // Also create files for tomorrow.
+        // Also create week and month files for tomorrow if we will be in a new week/month.
         date = utils.addDays(date, 1);
-        path = day.dateToFilePath(date)
-        if (!this.app.vault.getAbstractFileByPath(path)) {
-            // Create today's file.
-            this.app.vault.create(path, day.DAY_TEMPLATE);
-        }
 
         path = week.dateToFilePath(date)
         if (!this.app.vault.getAbstractFileByPath(path)) {
-            // Create this week's file.
-            this.app.vault.create(path, week.WEEK_TEMPLATE);
+            // Create next week's file.
+            await this.app.vault.create(path, week.getWeekTemplate(date));
         }
 
         path = month.dateToFilePath(date)
         if (!this.app.vault.getAbstractFileByPath(path)) {
-            // Create this month's file.
-            this.app.vault.create(path, month.MONTH_TEMPLATE);
+            // Create next month's file.
+            await this.app.vault.create(path, month.MONTH_TEMPLATE);
         }
     }
 
