@@ -95,11 +95,11 @@ export default class MyPlugin extends Plugin {
         const parentFolder = splitPath[0];
         const fileName = splitPath[1];
         if (parentFolder === day.DAY_FOLDER) {
-            if (!/Day Planner-\d\d\d\d-\d\d-\d\d\.md/.test(fileName)) {
+            if (!/\d\d\d\d-\d\d-\d\d\.md/.test(fileName)) {
                 return;
             }
 
-            const dateStr = fileName.split('-')[1].slice(0, -3);
+            const dateStr = fileName.slice(0, -3);
             const date = utils.strToDate(dateStr);
             // Propagate changes up.
             await week.updateWeekFromDay(this.app.vault, date);

@@ -23,11 +23,13 @@ export async function updateMonthFromWeek(vault: Vault, date: Date) {
 
     const tasks = await week.getAllTasks(vault, date);
     await updateTasks(vault, file as TFile, tasks);
+    await project.updateProjectsFromMonth(vault, getFirstDay(date));
 }
 
 export async function updateMonthsFromProject(vault: Vault, projectName: string) {
     let tasks = await project.getTasks(vault, projectName);
     let currMonthFile: TFile | null = null;
+    let currMonthDate = new Date();
 
     for (const file of vault.getMarkdownFiles()) {
         if (file.path.slice(0, MONTH_FOLDER.length) != MONTH_FOLDER) {
@@ -46,6 +48,7 @@ export async function updateMonthsFromProject(vault: Vault, projectName: string)
 
         if (date.getMonth() === currMonth) {
             currMonthFile = file;
+            currMonthDate = date;
         }
 
         // Read in the file.
@@ -61,6 +64,7 @@ export async function updateMonthsFromProject(vault: Vault, projectName: string)
         }
 
         await vault.modify(file, lines.join('\n'));
+        await week.updateWeeksFromMonth(vault, date);
     }
 
 
@@ -73,6 +77,7 @@ export async function updateMonthsFromProject(vault: Vault, projectName: string)
         }
 
         await vault.modify(currMonthFile, output + input);
+        await week.updateWeeksFromMonth(vault, currMonthDate);
     }
 }
 
@@ -159,8 +164,12 @@ async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
 }
 
 export function dateToFilePath(date: Date): string {
+    const firstDay = getFirstDay(date);
+    return `${MONTH_FOLDER}/${firstDay.getFullYear()}-${(new String(firstDay.getMonth() + 1)).padStart(2, '0')}.md`;
+}
+
+function getFirstDay(date: Date): Date {
     const monday = utils.getMonday(date);
     const sunday = utils.addDays(monday, 6);
-    const firstDay = utils.addDays(sunday, -sunday.getDate() + 1);
-    return `${MONTH_FOLDER}/${firstDay.getFullYear()}-${(new String(firstDay.getMonth() + 1)).padStart(2, '0')}.md`;
+    return utils.addDays(sunday, -sunday.getDate() + 1);
 }

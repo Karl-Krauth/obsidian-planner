@@ -29,6 +29,7 @@ export async function updateWeekFromDay(vault: Vault, date: Date) {
 
     const tasks = await day.getTasks(vault, date);
     await updateTasks(vault, file as TFile, tasks);
+    await month.updateMonthFromWeek(vault, utils.getMonday(date));
 }
 
 export async function updateWeeksFromMonth(vault: Vault, date: Date) {
@@ -40,6 +41,7 @@ export async function updateWeeksFromMonth(vault: Vault, date: Date) {
         if (file instanceof TFile) {
             const tasks = await month.getTasks(vault, currMonday);
             await updateTasks(vault, file as TFile, tasks);
+            await day.updateDaysFromWeek(vault, currMonday);
         }
 
         currMonday = utils.addDays(currMonday, 7);
