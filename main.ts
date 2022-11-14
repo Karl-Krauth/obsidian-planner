@@ -75,7 +75,7 @@ export default class MyPlugin extends Plugin {
         path = month.dateToFilePath(date)
         if (!this.app.vault.getAbstractFileByPath(path)) {
             // Create this month's file.
-            await this.app.vault.create(path, month.MONTH_TEMPLATE);
+            await this.app.vault.create(path, month.getMonthTemplate(date));
         }
 
         // Also create week and month files for tomorrow if we will be in a new week/month.
@@ -90,7 +90,7 @@ export default class MyPlugin extends Plugin {
         path = month.dateToFilePath(date)
         if (!this.app.vault.getAbstractFileByPath(path)) {
             // Create next month's file.
-            await this.app.vault.create(path, month.MONTH_TEMPLATE);
+            await this.app.vault.create(path, month.getMonthTemplate(date));
         }
     }
 

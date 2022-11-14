@@ -5,14 +5,25 @@ import * as week from 'week';
 
 export const MONTH_FOLDER = 'Months';
 
-export const MONTH_TEMPLATE = '# Week 1\n' +
-                              '---\n\n' +
-                              '# Week 2\n' +
-                              '---\n\n' +
-                              '# Week 3\n' +
-                              '---\n\n' +
-                              '# Week 4\n' +
-                              '---\n\n';
+export function getMonthTemplate(date: Date): string {
+    date = getFirstDay(date);
+    let out = '';
+    let currMonday = utils.getMonday(date);
+    let currSunday = utils.addDays(currMonday, 6);
+    for (let i = 0; i < 5; i++) {
+        if (currSunday.getMonth() !== date.getMonth()) {
+            break;
+        }
+
+        const filePath = week.dateToFilePath(currMonday);
+        out += `# [Week ${i + 1}](${filePath})\n`
+        out += '---\n\n';
+        currMonday = utils.addDays(currMonday, 7);
+        currSunday = utils.addDays(currSunday, 7);
+    }
+
+    return out;
+}
 
 export async function updateMonthFromWeek(vault: Vault, date: Date) {
     const filePath = dateToFilePath(date);
