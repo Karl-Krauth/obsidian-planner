@@ -33,7 +33,7 @@ export async function updateMonthFromWeek(vault: Vault, date: Date) {
     }
 
     const tasks = await week.getAllTasks(vault, date);
-    await updateTasks(vault, file as TFile, tasks);
+    await updateTasks(vault, file as TFile, tasks, false);
     await project.updateProjectsFromMonth(vault, getFirstDay(date));
 }
 
@@ -149,7 +149,7 @@ export async function getTasks(vault: Vault, date: Date): Promise<Set<string>> {
     return tasks;
 }
 
-async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
+async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>, addNew: boolean) {
     // Read in the file.
     let lines = (await vault.read(file)).split('\n');
 

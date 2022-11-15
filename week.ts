@@ -36,7 +36,7 @@ export async function updateWeekFromDay(vault: Vault, date: Date) {
     }
 
     const tasks = await day.getTasks(vault, date);
-    await updateTasks(vault, file as TFile, tasks);
+    await updateTasks(vault, file as TFile, tasks, false);
     await month.updateMonthFromWeek(vault, utils.getMonday(date));
 }
 
@@ -48,7 +48,7 @@ export async function updateWeeksFromMonth(vault: Vault, date: Date) {
         let file = vault.getAbstractFileByPath(filePath);
         if (file instanceof TFile) {
             const tasks = await month.getTasks(vault, currMonday);
-            await updateTasks(vault, file as TFile, tasks);
+            await updateTasks(vault, file as TFile, tasks, true);
             await day.updateDaysFromWeek(vault, currMonday);
         }
 
@@ -116,7 +116,7 @@ export async function getTasks(vault: Vault, date: Date): Promise<Set<string>> {
     return tasks;
 }
 
-async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
+async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>, addNew: boolean) {
     // Read in the file.
     let lines = (await vault.read(file)).split('\n');
 
@@ -146,9 +146,11 @@ async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
         }
     }
 
-    // Create the unassigned tasks preamble.
-    for (const task of newTasks) {
-        output += task + '\n';
+    if (addNew) {
+        // Create the unassigned tasks preamble.
+        for (const task of newTasks) {
+            output += task + '\n';
+        }
     }
 
     // Add the original file back.
