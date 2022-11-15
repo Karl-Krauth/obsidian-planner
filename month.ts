@@ -52,12 +52,14 @@ export async function updateMonthsFromProject(vault: Vault, projectName: string)
         }
 
         const date = utils.strToDate(file.basename);
-        const currMonth = utils.addDays(utils.getMonday(new Date()), 6).getMonth();
-        if (date.getMonth() < currMonth) {
+        const now = new Date();
+        const currMonthDay = utils.addDays(utils.getMonday(now), 6).getMonth();
+        const currMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        if (date < currMonth) {
             continue;
         }
 
-        if (date.getMonth() === currMonth) {
+        if (date.getTime() === currMonth.getTime()) {
             currMonthFile = file;
             currMonthDate = date;
         }
