@@ -33,12 +33,11 @@ export async function updateDaysFromWeek(vault: Vault, date: Date) {
     for (let i = 0; i < 7; i++) {
         const filePath = dateToFilePath(currDate);
         let file = vault.getAbstractFileByPath(filePath);
-        if (!(file instanceof TFile)) {
-            continue;
+        if (file instanceof TFile) {
+            const tasks = await week.getTasks(vault, currDate);
+            await updateTasks(vault, file as TFile, tasks);
         }
 
-        const tasks = await week.getTasks(vault, currDate);
-        await updateTasks(vault, file as TFile, tasks);
         currDate = utils.addDays(currDate, 1);
     }
 }
