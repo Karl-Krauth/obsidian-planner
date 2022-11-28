@@ -104,22 +104,22 @@ export default class MyPlugin extends Plugin {
                 /\d\d\d\d-\d\d-\d\d\.md/.test(fileName)) {
                 const date = utils.strToDate(fileName.slice(0, -3));
                 const content = await this.app.vault.read(file);
-                if (!content) {
-                    this.app.vault.modify(file, day.getDayTemplate(date));
+                if (!content.trim()) {
+                    await this.app.vault.modify(file, day.getDayTemplate(date));
                 }
             } else if (parentFolder === week.WEEK_FOLDER &&
                        /\d\d\d\d-\d\d-\d\d\.md/.test(fileName)) {
                 const date = utils.strToDate(fileName.slice(0, -3));
                 const content = await this.app.vault.read(file);
-                if (!content) {
-                    this.app.vault.modify(file, week.getWeekTemplate(date));
+                if (!content.trim()) {
+                    await this.app.vault.modify(file, week.getWeekTemplate(date));
                 }
             } else if (parentFolder === month.MONTH_FOLDER &&
                        /\d\d\d\d-\d\d.md/.test(fileName)) {
                 const date = utils.strToDate(fileName.slice(0, -3));
                 const content = await this.app.vault.read(file);
-                if (!content) {
-                    this.app.vault.modify(file, month.getMonthTemplate(date));
+                if (!content.trim()) {
+                    await this.app.vault.modify(file, month.getMonthTemplate(date));
                 }
             }
         }
