@@ -86,7 +86,9 @@ export async function updateMonthsFromProject(vault: Vault, projectName: string)
         const input = await vault.read(currMonthFile);
         let output = '';
         for (const task of tasks) {
-            output += task + '\n';
+            if (!utils.isTicked(task)) {
+                output += task + '\n';
+            }
         }
 
         await vault.modify(currMonthFile, output + input);

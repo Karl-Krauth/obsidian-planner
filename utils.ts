@@ -60,6 +60,10 @@ export function strToDate(dateStr: string): Date {
     return new Date(year, month - 1, day);
 }
 
+export function isTicked(task: string): boolean {
+    return /^\s*- \[[xX]\]/.test(task);
+}
+
 export function tickTask(task: string): string {
     return task.replace(/^(\s*)- \[[xX ]\]/, '$1- [x]');
 }
