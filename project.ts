@@ -13,6 +13,7 @@ export async function updateProjectsFromMonth(vault: Vault, date: Date) {
             continue;
         }
 
+        const project = projectMatch[1];
         let taskList = projectTasks.get(project);
         if (!taskList) {
             taskList = new Set<string>();
