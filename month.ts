@@ -54,7 +54,7 @@ export async function updateMonthsFromProject(vault: Vault, projectName: string)
         const date = utils.strToDate(file.basename);
         const now = new Date();
         const currMonthDay = utils.addDays(utils.getMonday(now), 6).getMonth();
-        const currMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const currMonth = new Date(now.getFullYear(), currMonthDay, 1);
         if (date < currMonth) {
             continue;
         }
