@@ -63,7 +63,7 @@ export default class MyPlugin extends Plugin {
         let path = day.dateToFilePath(date)
         if (!this.app.vault.getAbstractFileByPath(path)) {
             // Create today's file.
-            this.app.vault.create(path, day.getDayTemplate(date));
+            await this.app.vault.create(path, day.getDayTemplate(date));
         }
 
         path = week.dateToFilePath(date)
@@ -95,6 +95,8 @@ export default class MyPlugin extends Plugin {
     }
 
     async updateFiles(file: TFile | null) {
+        this.createFiles();
+
         // Handle the case where we've opened an empty relevant file.
         if (file) {
             const splitPath = file.path.split('/');
