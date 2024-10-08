@@ -54,5 +54,5 @@ esbuild.build({
     logLevel: "info",
     sourcemap: prod ? false : 'inline',
     treeShaking: true,
-    outfile: '/mnt/c/Users/karlk/Documents/Obsidian\ Vault/.obsidian/plugins/obsidian-planner/main.js',
+    outfile: 'main.js',
 }).catch(() => process.exit(1));
