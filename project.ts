@@ -34,10 +34,7 @@ export async function updateProjectsFromMonth(vault: Vault, date: Date) {
         let lines = (await vault.read(file)).split('\n');
 
         // Update task ticks.
-        lines = utils.updateTicks(lines, taskList);
-
-        // Concatenate the file back together.
-        output += lines.join('\n');
+        const output = utils.updateTicks(lines, taskList).join('\n');
 
         // Write out the file.
         await vault.modify(file, output);
@@ -62,6 +59,17 @@ export async function getTasks(vault: Vault, project: string): Promise<Set<strin
     }
 
     return tasks;
+}
+
+export function getProjects(vault: Vault): Set<string> {
+    let projects = new Set<string>();
+    for (const file of vault.getMarkdownFiles()) {
+        if (file.path.slice(0, PROJECT_FOLDER.length) === PROJECT_FOLDER) {
+            projects.add(file.basename);
+        }
+    }
+
+    return projects;
 }
 
 function getProjectPath(project: string): string {

@@ -5,9 +5,18 @@ import * as week from 'week';
 
 export const MONTH_FOLDER = 'Months';
 
-export function getMonthTemplate(date: Date): string {
-    date = getFirstDay(date);
+export async function getMonthTemplate(vault: Vault, date: Date): Promise<string> {
     let out = '';
+    for (const proj of project.getProjects(vault)) {
+        const tasks = await project.getTasks(vault, proj);
+        for (const task of tasks) {
+            if (!utils.isTicked(task)) {
+                out += task + '\n';
+            }
+        }
+    }
+
+    date = getFirstDay(date);
     let currMonday = utils.getMonday(date);
     let currSunday = utils.addDays(currMonday, 6);
     for (let i = 0; i < 5; i++) {
@@ -33,7 +42,7 @@ export async function updateMonthFromWeek(vault: Vault, date: Date) {
     }
 
     const tasks = await week.getAllTasks(vault, date);
-    await updateTasks(vault, file as TFile, tasks, false);
+    await updateTasks(vault, file as TFile, tasks);
     await project.updateProjectsFromMonth(vault, getFirstDay(date));
 }
 
@@ -67,32 +76,11 @@ export async function updateMonthsFromProject(vault: Vault, projectName: string)
         // Read in the file.
         let lines = (await vault.read(file)).split('\n');
 
-        // Update task ticks and remove tasks owned by this month.
+        // Update task ticks.
         lines = utils.updateTicks(lines, tasks);
-        for (const line of lines) {
-            const task = utils.parseTask(line);
-            if (task) {
-                tasks.delete(task);
-            }
-        }
 
         await vault.modify(file, lines.join('\n'));
         await week.updateWeeksFromMonth(vault, date);
-    }
-
-
-    // Read in the file for this month if it exists.
-    if (currMonthFile) {
-        const input = await vault.read(currMonthFile);
-        let output = '';
-        for (const task of tasks) {
-            if (!utils.isTicked(task)) {
-                output += task + '\n';
-            }
-        }
-
-        await vault.modify(currMonthFile, output + input);
-        await week.updateWeeksFromMonth(vault, currMonthDate);
     }
 }
 
@@ -151,33 +139,14 @@ export async function getTasks(vault: Vault, date: Date): Promise<Set<string>> {
     return tasks;
 }
 
-async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>, addNew: boolean) {
+async function updateTasks(vault: Vault, file: TFile, tasks: Set<string>) {
     // Read in the file.
     let lines = (await vault.read(file)).split('\n');
 
     // Update task ticks and determine which tasks are new.
     lines = utils.updateTicks(lines, tasks);
-    const newTasks = utils.getNewTasks(lines, tasks);
-
-    let output = '';
-    // Account for the case where we have a heading.
-    if (lines.length >= 1 && !/^#+ +\[?week/.test(lines[0].toLowerCase())) {
-        output += lines[0] + '\n';
-        lines.shift();
-        if (lines.length >= 1 && /^---/.test(lines[0])) {
-            output += lines[0] + '\n';
-            lines.shift();
-        }
-    }
-
-    // Create the unassigned tasks preamble.
-    for (const task of newTasks) {
-        output += task + '\n';
-    }
-
-    // Add the original file back.
-    output += lines.join('\n');
-
+    // Concatenate the file back together.
+    let output = lines.join('\n');
     // Write out the file.
     await vault.modify(file, output);
 }
