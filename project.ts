@@ -33,18 +33,11 @@ export async function updateProjectsFromMonth(vault: Vault, date: Date) {
         // Read in the file.
         let lines = (await vault.read(file)).split('\n');
 
-        // Update task ticks and determine which tasks are new.
+        // Update task ticks.
         lines = utils.updateTicks(lines, taskList);
-        const newTasks = utils.getNewTasks(lines, taskList);
 
-        let output = '';
-        // Create the unassigned tasks preamble.
-        for (const task of newTasks) {
-            output += task + '\n';
-        }
-
-        // Add the original file back.
-        output += lines.join('\n') + '\n';
+        // Concatenate the file back together.
+        output += lines.join('\n');
 
         // Write out the file.
         await vault.modify(file, output);
@@ -74,4 +67,3 @@ export async function getTasks(vault: Vault, project: string): Promise<Set<strin
 function getProjectPath(project: string): string {
     return PROJECT_FOLDER + '/' + project + '.md';
 }
-
