@@ -14,8 +14,9 @@ export function getDayTemplate(date: Date): string {
     const months = ['January', 'February', 'March', 'April', 'May', 'June',
                     'July', 'August', 'September', 'October', 'November', 'December'];
     const monthPath = month.dateToFilePath(date);
-    const weekNum = getDayNum(date)
-    const weekDay = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][weekNum];
+    const dayNum = getDayNum(date);
+    const weekDay = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][dayNum];
+    const weekNum = week.getWeekNum(utils.getMonday(date));
     const weekPath = week.dateToFilePath(date);
     let out = `# ${weekDay} [Week ${weekNum + 1}](${weekPath}) [${months[monthNum]}](${monthPath}) ${sunday.getFullYear()}\n`
     out += '---\n';
